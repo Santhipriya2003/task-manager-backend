@@ -17,7 +17,7 @@ import com.example.taskmanager.util.JwtUtil;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin("*")
+@CrossOrigin(origins = "https://task-manager-frontend-7kqk.onrender.com")
 public class AuthController {
 
     @Autowired
