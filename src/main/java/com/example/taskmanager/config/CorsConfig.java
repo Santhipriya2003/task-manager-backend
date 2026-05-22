@@ -13,22 +13,26 @@ public class CorsConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("*"));
+        // Allow your local React + deployed Render frontend
+        configuration.setAllowedOriginPatterns(List.of(
+            "http://localhost:*", 
+            "https://task-manager-frontend-7kqk.onrender.com"
+        ));
 
-        configuration.setAllowedMethods(
-                List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")
-        );
+        // Allow all standard methods
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
+        // Allow all headers
         configuration.setAllowedHeaders(List.of("*"));
 
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
+        // This is CRITICAL for JWT/login to work
+        configuration.setAllowCredentials(true);
 
+        // Apply this config to all routes
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-
         return source;
     }
 }

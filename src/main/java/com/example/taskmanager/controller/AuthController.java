@@ -17,7 +17,7 @@ import com.example.taskmanager.util.JwtUtil;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "https://task-manager-frontend-7kqk.onrender.com")
+@CrossOrigin(origins = "*")
 public class AuthController {
 
     @Autowired
@@ -28,37 +28,100 @@ public class AuthController {
 
     @Autowired
     private BCryptPasswordEncoder encoder;
-@PostMapping("/register")
-public String register(@RequestBody User user) {
 
-    user.setPassword(encoder.encode(user.getPassword()));
+    // ================= REGISTER =================
 
-    // 🔥 FIX: set default role
-    if (user.getRole() == null || user.getRole().isEmpty()) {
-        user.setRole("ADMIN");   // or MEMBER
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody User user) {
+
+        try {
+
+            // CHECK IF EMAIL ALREADY EXISTS
+            if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+                return ResponseEntity
+                        .badRequest()
+                        .body("Email already exists");
+            }
+
+            // ENCODE PASSWORD
+            user.setPassword(
+                    encoder.encode(user.getPassword())
+            );
+
+            // DEFAULT ROLE
+            if (user.getRole() == null ||
+                user.getRole().isEmpty()) {
+
+                user.setRole("ADMIN");
+            }
+
+            // SAVE USER
+            userRepository.save(user);
+
+            return ResponseEntity.ok(
+                    "User registered successfully"
+            );
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            return ResponseEntity
+                    .internalServerError()
+                    .body("Registration failed: " + e.getMessage());
+        }
     }
 
-    userRepository.save(user);
-
-    return "User registered successfully";
-}
+    // ================= LOGIN =================
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(
+            @RequestBody LoginRequest request
+    ) {
 
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElse(null);
+        try {
 
-        if (user == null) {
-            return ResponseEntity.status(401).body("User not found");
+            User user = userRepository
+                    .findByEmail(request.getEmail())
+                    .orElse(null);
+
+            if (user == null) {
+                return ResponseEntity
+                        .status(401)
+                        .body("User not found");
+            }
+
+            // CHECK PASSWORD
+            if (!encoder.matches(
+                    request.getPassword(),
+                    user.getPassword()
+            )) {
+
+                return ResponseEntity
+                        .status(401)
+                        .body("Invalid password");
+            }
+
+            // GENERATE TOKEN
+            String token = jwtUtil.generateToken(
+                    user.getEmail()
+            );
+
+            // RETURN TOKEN + ROLE
+            return ResponseEntity.ok(
+                    new AuthResponse(
+                            token,
+                            user.getRole()
+                    )
+            );
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            return ResponseEntity
+                    .internalServerError()
+                    .body("Login failed: " + e.getMessage());
         }
-
-        if (!encoder.matches(request.getPassword(), user.getPassword())) {
-            return ResponseEntity.status(401).body("Invalid password");
-        }
-
-        String token = jwtUtil.generateToken(user.getEmail());
-
-        return ResponseEntity.ok(new AuthResponse(token, user.getRole()));
     }
 }
