@@ -28,11 +28,15 @@ public class AuthController {
 
     @Autowired
     private BCryptPasswordEncoder encoder;
-
-    @PostMapping("/register")
+@PostMapping("/register")
 public String register(@RequestBody User user) {
 
     user.setPassword(encoder.encode(user.getPassword()));
+
+    // 🔥 FIX: set default role
+    if (user.getRole() == null || user.getRole().isEmpty()) {
+        user.setRole("ADMIN");   // or MEMBER
+    }
 
     userRepository.save(user);
 
