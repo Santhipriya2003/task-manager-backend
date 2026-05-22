@@ -9,24 +9,26 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
 
-    // Password encoder bean (IMPORTANT)
+    // PASSWORD ENCODER
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // Security configuration
-   @Bean
-public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    // SECURITY
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-    http
-        .csrf(csrf -> csrf.disable())
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/api/auth/**").permitAll()
-            .requestMatchers("/api/tasks/**").permitAll()  // ✅ TEMP FIX
-            .anyRequest().permitAll()
-        );
+        http
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> {}) // IMPORTANT
 
-    return http.build();
-}
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/tasks/**").permitAll()
+                .anyRequest().permitAll()
+            );
+
+        return http.build();
+    }
 }
