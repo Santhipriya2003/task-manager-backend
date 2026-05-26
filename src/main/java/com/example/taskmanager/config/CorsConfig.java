@@ -1,38 +1,26 @@
 package com.example.taskmanager.config;
 
-import java.util.List;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class CorsConfig {
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
+    public WebMvcConfigurer corsConfigurer() {
 
-        // Allow your local React + deployed Render frontend
-        configuration.setAllowedOriginPatterns(List.of(
-            "http://localhost:*", 
-            "https://task-manager-frontend-7kqk.onrender.com"
-        ));
+        return new WebMvcConfigurer() {
 
-        // Allow all standard methods
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
 
-        // Allow all headers
-        configuration.setAllowedHeaders(List.of("*"));
-
-        // This is CRITICAL for JWT/login to work
-        configuration.setAllowCredentials(true);
-
-        // Apply this config to all routes
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
+                registry.addMapping("/**")
+                        .allowedOrigins("https://task-manager-frontend-7kqk.onrender.com")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*");
+            }
+        };
     }
 }
