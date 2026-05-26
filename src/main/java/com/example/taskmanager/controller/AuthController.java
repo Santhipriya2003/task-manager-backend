@@ -2,7 +2,7 @@ package com.example.taskmanager.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,11 +25,9 @@ public class AuthController {
 
     @Autowired
     private JwtUtil jwtUtil;
-
     @Autowired
-    private BCryptPasswordEncoder encoder;
-
-    // ================= REGISTER =================
+   private PasswordEncoder encoder;
+     // ================= REGISTER =================
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
